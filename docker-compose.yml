@@ -1,0 +1,34 @@
+services:
+
+  postgres:
+    image: pgvector/pgvector:pg17
+
+    container_name: leettracker-postgres
+
+    environment:
+      POSTGRES_DB: leettracker
+      POSTGRES_USER: leettracker
+      POSTGRES_PASSWORD: leettracker
+
+    ports:
+      - "55432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+
+    container_name: leettracker-redis
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+volumes:
+
+  postgres_data:
+
+  redis_data:
