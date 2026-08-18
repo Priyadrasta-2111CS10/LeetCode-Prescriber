@@ -56,31 +56,19 @@ class LeetCodeClient:
     def __init__(
         self,
         timeout=None,
-        requests_per_second: float = 1.0,
-        leetcode_session: str | None = None,
-        csrf_token: str | None = None,
+        requests_per_second=1.0,
+        leetcode_session=None,
+        csrf_token=None,
     ):
         self.timeout = timeout or self.DEFAULT_TIMEOUT
 
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = logging.getLogger(
+            self.__class__.__name__
+        )
 
-        self.session = requests.Session()
-
-        self.session.headers.update({
-            "User-Agent": (
-                "Mozilla/5.0 "
-                "(Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 "
-                "(KHTML, like Gecko) "
-                "Chrome/151.0.0.0 "
-                "Safari/537.36"
-            ),
-            "Content-Type": "application/json",
-            "Referer": "https://leetcode.com/",
-        })
+        self.session = self._create_session()
 
         if leetcode_session:
-
             self.session.cookies.set(
                 "LEETCODE_SESSION",
                 leetcode_session,
@@ -88,7 +76,6 @@ class LeetCodeClient:
             )
 
         if csrf_token:
-
             self.session.cookies.set(
                 "csrftoken",
                 csrf_token,
@@ -98,7 +85,6 @@ class LeetCodeClient:
             self.session.headers.update({
                 "x-csrftoken": csrf_token,
             })
-
 
         self.rate_limiter = RateLimiter(
             requests_per_second=requests_per_second
