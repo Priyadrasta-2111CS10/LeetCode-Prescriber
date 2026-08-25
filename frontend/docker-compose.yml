@@ -1,0 +1,20 @@
+# Standalone compose file for the frontend only.
+#
+# To run everything together, copy this "frontend" service block into
+# your project's existing docker-compose.yml (the one with postgres and
+# redis) instead of running this file separately — that way the frontend
+# can reach the backend by container name (see nginx.conf's proxy_pass).
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_USE_MOCK_DATA: "false"
+    container_name: leettracker-frontend
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+    # depends_on:
+    #   - leettracker-api   # uncomment once merged into the main compose file
