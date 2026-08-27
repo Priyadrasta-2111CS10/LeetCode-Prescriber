@@ -86,10 +86,10 @@ public List<TopicStatsResponse> getWeakTopics(
     );
 }
 
-@Cacheable(
-        value = "analytics",
-        key = "#username"
-)
+// @Cacheable(
+//         value = "analytics",
+//         key = "#username"
+// )
 public AnalyticsSummaryResponse getSummary(
         String username
 ) {
