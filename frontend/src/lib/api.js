@@ -17,16 +17,25 @@ class ApiError extends Error {
   }
 }
 
-async function request(path) {
+// `options` is forwarded straight to fetch() — method, signal, body,
+// etc. Previously this only ever accepted `path`, so any caller trying
+// to pass { method: "POST" } (like syncUser below) was silently
+// ignored and every request went out as GET regardless of what was
+// asked for.
+async function request(path, options = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
     headers: { Accept: "application/json" },
+    ...options,
   });
 
   if (!response.ok) {
     throw new ApiError(`${path} responded with ${response.status}`, response.status);
   }
 
-  return response.json();
+  // POST /sync returns 200 with no body in some setups — guard against
+  // response.json() throwing on an empty body.
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
 }
 
 // Matches AnalyticsController -> AnalyticsService.getSummary(username) ->
@@ -46,14 +55,23 @@ export function getUser(username) {
   return request(`/api/v1/users/${encodeURIComponent(username)}`);
 }
 
-// No recent-submissions endpoint exists on the backend yet (only
-// UserController, AnalyticsController, PracticePlanController are wired
-// up). App.jsx already catches this call's failure and falls back to an
-// empty list, so the dashboard still renders without it. Add a real
-// endpoint (e.g. backed by SubmissionRepository.findAll()) and point
-// this at it once it exists.
+// Matches SubmissionController -> SubmissionService.getRecentSubmissions
 export function getRecentSubmissions(username) {
   return request(`/api/v1/users/${encodeURIComponent(username)}/submissions/recent`);
+}
+
+// Triggers a fresh sync against LeetCode before the dashboard loads.
+// Client-side timeout via AbortController so a slow/hanging sync can't
+// block the dashboard indefinitely — it aborts and falls back to
+// whatever's already in the database.
+export function syncUser(username, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  return request(`/api/v1/users/${encodeURIComponent(username)}/sync`, {
+    method: "POST",
+    signal: controller.signal,
+  }).finally(() => clearTimeout(timeoutId));
 }
 
 export { ApiError };

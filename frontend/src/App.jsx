@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ClipboardList } from "lucide-react";
 import { tokens, fontMono, fontDisplay } from "./lib/tokens.js";
-import { getAnalyticsSummary, getPracticePlan, getRecentSubmissions, ApiError } from "./lib/api.js";
+import { getAnalyticsSummary, getPracticePlan, getRecentSubmissions, syncUser, ApiError } from "./lib/api.js";
 import {
   mockOverall,
   mockDifficulty,
@@ -77,6 +77,23 @@ export default function App() {
           error: null,
         });
         return;
+      }
+
+      try {
+        // Best-effort sync before loading — if this fails or times
+        // out (expired LeetCode session, Python service degraded,
+        // etc.), we deliberately don't block the dashboard on it.
+        // Whatever's already in the database is still shown; the user
+        // just doesn't get today's newest submissions until sync
+        // succeeds again. Silent-but-logged rather than surfaced as a
+        // hard error, since a sync hiccup shouldn't make the whole
+        // dashboard look broken.
+        await syncUser(USERNAME);
+      } catch (err) {
+        console.warn(
+          "Sync before dashboard load failed or timed out — showing last known data.",
+          err
+        );
       }
 
       try {
