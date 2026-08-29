@@ -98,31 +98,17 @@ class UserRepository:
                 user.category_discuss_count,
         }
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    params,
-                )
-
-                return cursor.fetchone()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    params,
-                )
-
-                return cursor.fetchone()
+        return self.database.execute(
+                query,
+                params,
+                connection=connection,
+                fetch="one",
+            )
 
     def find_by_username(
         self,
         username: str,
+        connection=None,
     ) -> Optional[dict]:
 
         query = """
@@ -131,13 +117,9 @@ class UserRepository:
             WHERE username = %s;
         """
 
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (username,),
-                )
-
-                return cursor.fetchone()
+        return self.database.execute(
+            query,
+            (username,),
+            connection=connection,
+            fetch="one",
+        )

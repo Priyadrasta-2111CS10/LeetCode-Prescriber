@@ -65,6 +65,12 @@ class ProblemEmbeddingSearchRepository:
 
                 ups.last_attempted_at,
 
+                CASE
+                    WHEN p.topics ? %s
+                    THEN 1
+                    ELSE 0
+                END AS topic_match,
+
                 1 - (
                     pe.embedding
                     <=> %s::vector
@@ -79,14 +85,18 @@ class ProblemEmbeddingSearchRepository:
                 ON ups.problem_id = p.id
 
             WHERE
-                p.topics ? %s
-
-                AND COALESCE(
+                COALESCE(
                     ups.accepted_attempts,
                     0
                 ) = 0
 
             ORDER BY
+
+                CASE
+                    WHEN p.topics ? %s
+                    THEN 1
+                    ELSE 0
+                END DESC,
 
                 (
                     1 - (
@@ -123,30 +133,16 @@ class ProblemEmbeddingSearchRepository:
 
         params = (
             user_id,
+            topic,
             vector,
             topic,
             vector,
             limit,
         )
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    params,
-                )
-
-                return cursor.fetchall()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    params,
-                )
-
-                return cursor.fetchall()
+        return self.database.execute(
+            query,
+            params,
+            connection=connection,
+            fetch="all",
+        )

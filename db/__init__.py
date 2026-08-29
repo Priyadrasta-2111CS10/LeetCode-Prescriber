@@ -8,3 +8,4 @@ from .analytics_repository import AnalyticsRepository
 from .problem_recommendation_repository import ProblemRecommendationRepository
 from .problem_embedding_repository import ProblemEmbeddingRepository
 from .problem_embedding_search_repository import ProblemEmbeddingSearchRepository
+from .recommendation_repository import RecommendationRepository

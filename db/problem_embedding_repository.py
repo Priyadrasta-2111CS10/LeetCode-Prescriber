@@ -55,35 +55,16 @@ class ProblemEmbeddingRepository:
             "]"
         )
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (
-                        problem_id,
-                        content,
-                        vector,
-                        model,
-                    ),
-                )
-
-            return
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (
-                        problem_id,
-                        content,
-                        vector,
-                        model,
-                    ),
-                )
+        return self.database.execute(
+                query,
+                (
+                    problem_id,
+                    content,
+                    vector,
+                    model,
+                ),
+                connection=connection,
+            )
 
     def exists(
         self,
@@ -98,24 +79,12 @@ class ProblemEmbeddingRepository:
             LIMIT 1;
         """
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (problem_id,),
-                )
-
-                return cursor.fetchone() is not None
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (problem_id,),
-                )
-
-                return cursor.fetchone() is not None
+        return (
+            self.database.execute(
+                query,
+                (problem_id,),
+                connection=connection,
+                fetch="one",
+            )
+            is not None
+        )   

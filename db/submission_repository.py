@@ -15,7 +15,7 @@ class SubmissionRepository:
     def save(
         self,
         submission: Submission,
-        connection: None,
+        connection = None,
     ) -> dict:
 
         query = """
@@ -48,31 +48,17 @@ class SubmissionRepository:
             submission.title_slug,
         )
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    params,
-                )
-
-                return cursor.fetchone()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    params,
-                )
-
-                return cursor.fetchone()
+        return self.database.execute(
+                query,
+                params,
+                connection=connection,
+                fetch="one",
+            )
 
     def exists(
         self,
         submission_id: str,
+        connection = None,
     ) -> bool:
 
         query = """
@@ -83,20 +69,17 @@ class SubmissionRepository:
             ) AS exists;
         """
 
-        with self.database.get_connection() as connection:
+        result = self.database.execute(
+                query,
+                (submission_id,),
+                connection=connection,
+                fetch="one",
+            )
 
-            with connection.cursor() as cursor:
+        return result["exists"]
 
-                cursor.execute(
-                    query,
-                    (submission_id,),
-                )
-
-                result = cursor.fetchone()
-
-                return result["exists"]
-
-    def find_all(self):
+    def find_all(self,
+        connection=None,):
 
         query = """
             SELECT
@@ -115,27 +98,25 @@ class SubmissionRepository:
             ORDER BY s.submitted_at DESC;
         """
 
-        with self.database.get_connection() as connection:
+        return self.database.execute(
+                query,
+                connection=connection,
+                fetch="all",
+            )
 
-            with connection.cursor() as cursor:
-
-                cursor.execute(query)
-
-                return cursor.fetchall()
-
-    def count(self) -> int:
+    def count(self,
+              connection=None,
+              ) -> int:
 
         query = """
             SELECT COUNT(*) AS count
             FROM submissions;
         """
 
-        with self.database.get_connection() as connection:
+        result =  self.database.execute(
+                        query,
+                        connection=connection,
+                        fetch="one",
+                    )
 
-            with connection.cursor() as cursor:
-
-                cursor.execute(query)
-
-                result = cursor.fetchone()
-
-                return result["count"]
+        return result["count"]

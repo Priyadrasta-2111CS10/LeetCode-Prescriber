@@ -31,32 +31,18 @@ class SyncMetadataRepository:
             WHERE user_id = %s;
         """
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchone()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchone()
+        return self.database.execute(
+                        query,
+                        (user_id,),
+                        connection=connection,
+                        fetch="one",
+                    )
+        
 
     def start_sync(
         self,
         user_id: int,
-        connection: None, 
+        connection = None, 
     ) -> dict:
 
         query = """
@@ -80,34 +66,19 @@ class SyncMetadataRepository:
             RETURNING *;
         """
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchone()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchone()
+        return self.database.execute(
+                query,
+                (user_id,),
+                connection=connection,
+                fetch="one",
+            )
 
     def complete_sync(
         self,
         user_id: int,
         submission_id: Optional[str],
         submission_timestamp,
-        connection: None,
+        connection = None,
     ) -> dict:
 
         query = """
@@ -121,42 +92,24 @@ class SyncMetadataRepository:
             WHERE user_id = %s
             RETURNING *;
         """
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-            
-                            cursor.execute(
-                                query,
-                                (
-                                    submission_id,
-                                    submission_timestamp,
-                                    user_id,
-                                ),
-                            )
-            
-                            return cursor.fetchone()
 
 
-        with self.database.get_connection() as connection:
+        return self.database.execute(
+                        query,
+                        (
+                            submission_id,
+                            submission_timestamp,
+                            user_id,),
+                        connection=connection,
+                        fetch="one",
+                    )
 
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (
-                        submission_id,
-                        submission_timestamp,
-                        user_id,
-                    ),
-                )
-
-                return cursor.fetchone()
 
     def fail_sync(
         self,
         user_id: int,
         error: str,
-        connection : None
+        connection = None,
     ) -> None:
 
         query = """
@@ -166,26 +119,11 @@ class SyncMetadataRepository:
                 last_error = %s
             WHERE user_id = %s;
         """
-        if not connection:
-
-             with connection.cursor() as cursor:
-             
-                             cursor.execute(
-                                 query,
-                                 (
-                                     error,
-                                     user_id,
-                                 ),
-                             )
-                             
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (
-                        error,
-                        user_id,
-                    ),
-                )
+        self.database.execute(
+                query,
+                (
+                    error,
+                    user_id,
+                ),
+                connection=connection,
+            )

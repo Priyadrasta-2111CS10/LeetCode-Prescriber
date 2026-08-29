@@ -56,34 +56,17 @@ class ProblemRepository:
             "title": problem.title,
             "title_slug": problem.title_slug,
             "difficulty": problem.difficulty,
-            "topics": Jsonb(
-                problem.topics
-            ),
+            "topics": Jsonb(problem.topics),
             "is_paid_only": problem.is_paid_only,
-            "acceptance_rate":
-                problem.acceptance_rate,
+            "acceptance_rate":problem.acceptance_rate,
         }
 
-        if connection is not None:
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    params,
-                )
-
-                return cursor.fetchone()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    params,
-                )
-
-                return cursor.fetchone()
+        return self.database.execute(
+                query,
+                params,
+                connection=connection,
+                fetch="one",
+            )
 
     def find_by_slug(
         self,
@@ -96,27 +79,12 @@ class ProblemRepository:
             FROM problems
             WHERE title_slug = %s;
         """
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (title_slug,),
-                )
-
-                return cursor.fetchone()
-            
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (title_slug,),
-                )
-
-                return cursor.fetchone()
+        return self.database.execute(
+                query,
+                (title_slug,),
+                connection=connection,
+                fetch="one",
+            )
 
     def find_all(
         self,
@@ -137,18 +105,8 @@ class ProblemRepository:
             ORDER BY id;
         """
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(query)
-
-                return cursor.fetchall()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(query)
-
-                return cursor.fetchall()
+        return self.database.execute(
+                query,
+                connection=connection,
+                fetch="all",
+            )

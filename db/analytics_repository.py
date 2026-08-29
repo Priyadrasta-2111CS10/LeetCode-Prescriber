@@ -38,27 +38,12 @@ class AnalyticsRepository:
             WHERE user_id = %s;
         """
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
+        return self.database.execute(
                     query,
                     (user_id,),
+                    connection=connection,
+                    fetch="one",
                 )
-
-                return cursor.fetchone()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchone()
 
     def get_difficulty_stats(
         self,
@@ -102,27 +87,12 @@ class AnalyticsRepository:
                 END;
         """
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchall()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchall()
+        return self.database.execute(
+                query,
+                (user_id,),
+                connection=connection,
+                fetch="all",
+        )
 
     def get_topic_stats(
         self,
@@ -163,27 +133,12 @@ class AnalyticsRepository:
             ORDER BY total_attempts DESC;
         """
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchall()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchall()
+        return self.database.execute(
+                query,
+                (user_id,),
+                connection=connection,
+                fetch="all",
+            )
 
     def get_status_stats(
         self,
@@ -205,24 +160,9 @@ class AnalyticsRepository:
             ORDER BY count DESC;
         """
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchall()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (user_id,),
-                )
-
-                return cursor.fetchall()
+        return self.database.execute(
+                query,
+                (user_id,),
+                connection=connection,
+                fetch="all",
+            )

@@ -73,32 +73,13 @@ class ProblemRecommendationRepository:
             [topic]
         )
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (
-                        user_id,
-                        topic_json,
-                        limit,
-                    ),
-                )
-
-                return cursor.fetchall()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (
-                        user_id,
-                        topic_json,
-                        limit,
-                    ),
-                )
-
-                return cursor.fetchall()
+        return self.database.execute(
+                query,
+                (
+                    user_id,
+                    topic_json,
+                    limit,
+                ),
+                connection=connection,
+                fetch="all",
+            )

@@ -55,27 +55,12 @@ class SubmissionAttemptRepository:
             "submitted_at": attempt.submitted_at,
         }
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
+        return self.database.execute(
                     query,
                     params,
+                    connection=connection,
+                    fetch="one",
                 )
-
-                return cursor.fetchone()
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    params,
-                )
-
-                return cursor.fetchone()
 
     def exists_by_leetcode_submission_id(
         self,
@@ -90,24 +75,12 @@ class SubmissionAttemptRepository:
             LIMIT 1;
         """
 
-        if connection is not None:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
+        return (
+                self.database.execute(
                     query,
                     (leetcode_submission_id,),
+                    connection=connection,
+                    fetch="one",
                 )
-
-                return cursor.fetchone() is not None
-
-        with self.database.get_connection() as connection:
-
-            with connection.cursor() as cursor:
-
-                cursor.execute(
-                    query,
-                    (leetcode_submission_id,),
-                )
-
-                return cursor.fetchone() is not None
+                is not None
+            )
