@@ -4,7 +4,7 @@ from ai.personalized_retrieval_service import PersonalizedRetrievalService
 from ai.problem_recommender import AIProblemRecommender
 from analytics.weakness_detector import WeaknessDetector
 from analytics_service import AnalyticsService
-from db import Database, ProblemEmbeddingSearchRepository, UserRepository, AnalyticsRepository
+from db import Database, ProblemEmbeddingSearchRepository, UserRepository, AnalyticsRepository, RecommendationRepository
 from practice_plan_service import PracticePlanService
 
 
@@ -12,59 +12,27 @@ def main():
 
     database = Database()
 
-    user_repository = (
-        UserRepository(
-            database
-        )
-    )
-
-    analytics_repository = (
-        AnalyticsRepository(
-            database
-        )
-    )
+    user_repository = UserRepository(database)
+    analytics_repository = AnalyticsRepository(database)
+    recommend_repository = RecommendationRepository(database)
 
     analytics_service = (
         AnalyticsService(
-
-            analytics_repository=(
-                analytics_repository
-            ),
-
-            user_repository=(
-                user_repository
-            ),
-
-            weakness_detector=(
-                WeaknessDetector()
-            ),
+            analytics_repository = analytics_repository,
+            user_repository = user_repository,
+            weakness_detector = WeaknessDetector(),
         )
     )
 
-    search_repository = (
-        ProblemEmbeddingSearchRepository(
-            database
-        )
-    )
-
-    embedding_client = (
-        GeminiEmbeddingClient()
-    )
+    search_repository = ProblemEmbeddingSearchRepository(database)
+    embedding_client = GeminiEmbeddingClient()
 
     retrieval_service = (
         PersonalizedRetrievalService(
-
-            user_repository=(
-                user_repository
-            ),
-
-            search_repository=(
-                search_repository
-            ),
-
-            embedding_client=(
-                embedding_client
-            ),
+            user_repository=user_repository,
+            search_repository=search_repository,
+            embedding_client=embedding_client,
+            recommendation_repository=recommend_repository,
         )
     )
 
@@ -90,6 +58,9 @@ def main():
             ai_problem_recommender=(
                 ai_problem_recommender
             ),
+            user_repository= user_repository,
+            recommendation_repository= recommend_repository,
+
         )
     )
 
