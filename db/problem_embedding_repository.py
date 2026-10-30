@@ -88,3 +88,25 @@ class ProblemEmbeddingRepository:
             )
             is not None
         )   
+
+    def find_existing_problem_ids(
+        self,
+        problem_ids: list[int],
+        connection=None,
+    ) -> set[int]:
+        if not problem_ids:
+            return set()
+
+        query = """
+            SELECT problem_id
+            FROM problem_embeddings
+            WHERE problem_id = ANY(%s);
+        """
+
+        rows = self.database.execute(
+            query,
+            (problem_ids,),
+            connection=connection,
+            fetch="all",
+        )
+        return {row["problem_id"] for row in rows}
